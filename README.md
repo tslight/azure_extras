@@ -4,6 +4,11 @@
 
 `pip install azure_extras`
 
+## CONFIGURATION
+
+Copy [azure.example.ini](./azure.example.ini) to `$HOME/.azure.ini`, adding
+your subscription and tenant details along the way.
+
 ## KUDU CLI FRONTEND
 
 ``` text
