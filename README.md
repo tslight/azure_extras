@@ -2,7 +2,7 @@
 
 ## INSTALLATION
 
-`pip install azure_extras`
+`pip install azure-extras`
 
 ## CONFIGURATION
 
