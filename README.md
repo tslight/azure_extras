@@ -2,8 +2,8 @@
 
 W.I.P. Azure stuff to make my life easier.
 
-So far just a couple of classes to make dealing with Azure App Services less
-painful from a DevOps perspective.
+So far just a couple of classes and interactive scripts to make dealing with
+Azure App Services less painful from a DevOps perspective.
 
 ## INSTALLATION
 
@@ -17,6 +17,8 @@ your subscription and tenant details along the way.
 This location can be customised with the `--config` flag at runtime.
 
 ## APP SERVICE KUDU API CLI FRONTEND
+
+https://github.com/projectkudu/kudu
 
 ``` text
 usage: az-kudu [-h] [-a NAME] [-C PATH] [-r NAME]
@@ -44,6 +46,10 @@ optional arguments:
 ```
 
 ## APP SERVICE HEALTH CHECK
+
+Workaround until
+[this](https://github.com/projectkudu/kudu/wiki/Health-Check-(Preview)#overview)
+is implemented in [terraform](https://github.com/terraform-providers/terraform-provider-azurerm/issues/5147)
 
 ``` text
 usage: az-health-check [-h] [-a NAME] [-r NAME] (-e | -d) [-C PATH] [-v]
