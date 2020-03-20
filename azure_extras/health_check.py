@@ -37,10 +37,10 @@ def main():
     try:
         if args.enable:
             print(f"Enabling Health Check on {args.app}.. ", end="", flush="True")
-            az.enable_health_check(args.rg, args.app, enable=True)
+            az.toggle_health_check(args.rg, args.app, enable=True)
         elif args.disable:
             print(f"Disabling Health Check on {args.app}.. ", end="", flush="True")
-            az.enable_health_check(args.rg, args.app, enable=False)
+            az.toggle_health_check(args.rg, args.app, enable=False)
         print("DONE.")
     except Exception as error:
         print("FAIL.")

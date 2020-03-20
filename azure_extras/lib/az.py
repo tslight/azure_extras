@@ -52,7 +52,7 @@ class AzureExtras:
         }
         self.url = f"https://management.azure.com/subscriptions/{self.az['sub_id']}"
 
-    def enable_health_check(self, rg, app, enable):
+    def toggle_health_check(self, rg, app, enable):
         url = f"{self.url}/resourceGroups/{rg}/providers/Microsoft.Web/sites/{app}/config/web"
         params = {"api-version": "2018-02-01"}
 
@@ -77,7 +77,50 @@ class AzureExtras:
                     + f"Code:{response.status_code}"
                 )
         except Exception as error:
+            logging.debug(traceback.format_exc())
             raise error
+
+    def get_stream_analytics_job(self, rg, job):
+        url = f"{self.url}/resourceGroups/{rg}/providers/Microsoft.StreamAnalytics/streamingjobs/{job}"
+        params = {
+            "api-version": "2015-10-01",
+            "$expand": "inputs,transformation,outputs,functions",
+        }
+        try:
+            response = requests.get(url, headers=self.headers, params=params)
+            body = json.loads(response.content if response.content else "{}")
+            logging.debug(json.dumps(body))
+            if response.ok is False:
+                raise AssertionError(
+                    f"Failed to get {job} status from {url}\n"
+                    + f"Response Code: {response.status_code}\n"
+                    + f"Response Reason: {response.reason}"
+                )
+        except Exception as error:
+            logging.debug(traceback.format_exc())
+            raise error
+
+        return body
+
+    def toggle_stream_analytics_job(self, rg, job, action):
+        url = f"{self.url}/resourceGroups/{rg}/providers/Microsoft.StreamAnalytics/streamingjobs/{job}/{action}"
+        params = {"api-version": "2015-10-01"}
+
+        try:
+            response = requests.post(url, headers=self.headers, params=params)
+            body = json.loads(response.content if response.content else "{}")
+            logging.debug(json.dumps(body))
+            if response.ok is False:
+                raise AssertionError(
+                    f"Failed to {action} {job} using {url}\n"
+                    + f"Response Code: {response.status_code}\n"
+                    + f"Response Reason: {response.reason}"
+                )
+        except Exception as error:
+            logging.debug(traceback.format_exc())
+            raise error
+
+        return body
 
     def get_publish_profile(self, rg, app):
         """
@@ -89,7 +132,7 @@ class AzureExtras:
 
         try:
             response = requests.post(url, headers=self.headers, params=params)
-
+            body = json.loads(response.content if response.content else "{}")
             if response.ok:
                 soup = BeautifulSoup(response.text, features="html.parser")
                 logging.debug(f"Response XML:\n\n{soup.prettify()}\n")
@@ -114,9 +157,13 @@ class AzureExtras:
                 )
                 return publish_profile
 
-            logging.debug(f"Subscription ID: {sub}")
-            logging.debug("\n" + json.dumps(response.json(), indent=2, sort_keys=True))
-            raise AssertionError(f"{response.json()['error']['message']}")
+            logging.debug("\n" + json.dumps(body, indent=2, sort_keys=True))
+            raise AssertionError(
+                f"Failed to get PublishProfile using {url}\n"
+                + f"Response Code: {response.status_code}\n"
+                + f"Response Message: {body['error']['message']}\n"
+                + f"Response Reason: {response.reason}"
+            )
         except Exception as error:
             logging.debug(traceback.format_exc())
             raise error
