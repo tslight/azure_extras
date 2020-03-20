@@ -50,14 +50,16 @@ class AzureExtras:
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
         }
+        self.url = f"https://management.azure.com/subscriptions/{self.az['sub_id']}"
 
-    def enable_health_check(self, rg, app):
-        url = (
-            f"https://management.azure.com/subscriptions/{self.az['sub_id']}/"
-            + f"resourceGroups/{rg}/providers/Microsoft.Web/sites/{app}/config/web"
-        )
+    def enable_health_check(self, rg, app, enable):
+        url = f"{self.url}/resourceGroups/{rg}/providers/Microsoft.Web/sites/{app}/config/web"
         params = {"api-version": "2018-02-01"}
-        patch = {"properties": {"healthCheckPath": "/status/status.cshtml"}}
+
+        if enable:
+            patch = {"properties": {"healthCheckPath": "/status/status.cshtml"}}
+        else:
+            patch = {"properties": {"healthCheckPath": "null"}}
 
         try:
             response = requests.patch(
@@ -71,7 +73,7 @@ class AzureExtras:
             logging.debug(json.dumps(content, indent=2, sort_keys=True))
             if response.ok is False or success is False:
                 raise AssertionError(
-                    f"Failed to enable App Service Health Check on {app}\n"
+                    f"Failed to patch {url} with {patch}\n"
                     + f"Code:{response.status_code}"
                 )
         except Exception as error:
@@ -82,10 +84,7 @@ class AzureExtras:
         Get FTP and Web App credentials (username, password, hostname)
         https://docs.microsoft.com/en-us/rest/api/appservice/webapps/listpublishingprofilexmlwithsecrets
         """
-        url = (
-            f"https://management.azure.com/subscriptions/{self.az['sub_id']}/"
-            + f"resourceGroups/{rg}/providers/Microsoft.Web/sites/{app}/publishxml"
-        )
+        url = f"{self.url}/resourceGroups/{rg}/providers/Microsoft.Web/sites/{app}/publishxml"
         params = {"api-version": "2016-08-01"}
 
         try:

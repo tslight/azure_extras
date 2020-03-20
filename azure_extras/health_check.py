@@ -8,9 +8,18 @@ from .lib.utils import chkpath, mklog
 
 
 def get_args():
-    parser = ArgumentParser(description="Enable health check in Azure App Service")
+    parser = ArgumentParser(
+        description="Enable or disable health check in Azure App Service"
+    )
     parser.add_argument("-a", "--app", metavar=("NAME"), help="azure app service name")
     parser.add_argument("-r", "--rg", metavar=("NAME"), help="azure resource group")
+    group = parser.add_mutually_exclusive_group(required=True)
+    group.add_argument(
+        "-e", "--enable", action="store_true", help="enable health check"
+    )
+    group.add_argument(
+        "-d", "--disable", action="store_true", help="disable health check"
+    )
     parser.add_argument(
         "-C",
         "--config",
@@ -28,9 +37,13 @@ def main():
     mklog(args.v)
     az = AzureExtras(args.config)
 
-    print(f"Enabling Health Check on {args.app}.. ", end="", flush="True")
     try:
-        az.enable_health_check(args.rg, args.app)
+        if args.enable:
+            print(f"Enabling Health Check on {args.app}.. ", end="", flush="True")
+            az.enable_health_check(args.rg, args.app, enable=True)
+        elif args.disable:
+            print(f"Disabling Health Check on {args.app}.. ", end="", flush="True")
+            az.enable_health_check(args.rg, args.app, enable=False)
         print("DONE.")
     except Exception as error:
         print("FAIL.")
