@@ -10,7 +10,7 @@ from .lib.utils import chkpath, get_seconds, mklog
 
 
 def get_args():
-    parser = ArgumentParser()
+    parser = ArgumentParser(description="Stream Analytics Jobs Controller")
     parser.add_argument(
         "-C",
         "--config",

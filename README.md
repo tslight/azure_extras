@@ -5,6 +5,8 @@ W.I.P. Azure stuff to make my life easier.
 So far just a couple of classes and interactive scripts to make dealing with
 Azure App Services less painful from a DevOps perspective.
 
+Oh, and one for stopping and starting Azure Stream Analytics Jobs.
+
 ## INSTALLATION
 
 `pip install azure-extras`
@@ -64,4 +66,25 @@ optional arguments:
   -d, --disable           :disable health check
   -C PATH, --config PATH  :path to azure configuration file
   -v                      :increase verbosity
+```
+
+## STREAM ANALYTICS CONTROLLER
+
+``` text
+usage: az-sajctl [-h] [-C PATH] [-r NAME] [-j JOBS [JOBS ...]] [-a START/STOP]
+				 [-v]
+
+Stream Analytics Jobs Controller
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -C PATH, --config PATH
+						path to azure configuration file
+  -r NAME, --resource_group NAME
+						azure resource group
+  -j JOBS [JOBS ...], --stream_analytics_jobs JOBS [JOBS ...]
+						list of azure stream analytics jobs
+  -a START/STOP, --action START/STOP
+						action to carry out - start or stop.
+  -v                    increase verbosity
 ```
