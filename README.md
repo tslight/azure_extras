@@ -16,18 +16,18 @@ your subscription and tenant details along the way.
 
 This location can be customised with the `--config` flag at runtime.
 
-## KUDU CLI FRONTEND
+## APP SERVICE KUDU API CLI FRONTEND
 
 ``` text
 usage: az-kudu [-h] [-a NAME] [-C PATH] [-r NAME]
 			   (-c COMMAND | -e SLUG | -z PATH | -Z SOURCE DESTINATION)
 			   [-p PATH] [-v]
 
-CLI Kudu API fudger
+CLI Kudu API Frontend
 
 optional arguments:
   -h, --help            show this help message and exit
-  -a NAME, --app NAME   azure app name
+  -a NAME, --app NAME   azure app service name
   -C PATH, --config PATH
 						path to azure configuration file
   -r NAME, --rg NAME    azure resource group
