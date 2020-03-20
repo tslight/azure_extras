@@ -1,16 +1,13 @@
 #!/usr/bin/env python
 import logging
 import os
-import sys
-from argparse import ArgumentParser, ArgumentTypeError
+from argparse import ArgumentParser
 from .lib.az import AzureExtras
 from .lib.utils import chkpath, mklog
 
 
 def get_args():
-    parser = ArgumentParser(
-        description="Enable or disable health check in Azure App Service"
-    )
+    parser = ArgumentParser(description="Toggle health check in Azure App Service")
     parser.add_argument("-a", "--app", metavar=("NAME"), help="azure app service name")
     parser.add_argument("-r", "--rg", metavar=("NAME"), help="azure resource group")
     group = parser.add_mutually_exclusive_group(required=True)

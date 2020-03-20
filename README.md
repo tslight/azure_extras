@@ -1,5 +1,10 @@
 # THE STUFF MICROSOFT LEFT OUT
 
+W.I.P. Azure stuff to make my life easier.
+
+So far just a couple of classes to make dealing with Azure App Services less
+painful from a DevOps perspective.
+
 ## INSTALLATION
 
 `pip install azure-extras`
@@ -8,6 +13,8 @@
 
 Copy [azure.example.ini](./azure.example.ini) to `$HOME/.azure.ini`, adding
 your subscription and tenant details along the way.
+
+This location can be customised with the `--config` flag at runtime.
 
 ## KUDU CLI FRONTEND
 
@@ -39,15 +46,16 @@ optional arguments:
 ## APP SERVICE HEALTH CHECK
 
 ``` text
-usage: az-health-check [-h] [-a NAME] [-r NAME] [-C PATH] [-v]
+usage: az-health-check [-h] [-a NAME] [-r NAME] (-e | -d) [-C PATH] [-v]
 
-Enable health check in Azure App Service
+Toggle health check in Azure App Service
 
 optional arguments:
-  -h, --help            show this help message and exit
-  -a NAME, --app NAME   azure app name
-  -r NAME, --rg NAME    azure resource group
-  -C PATH, --config PATH
-						path to azure configuration file
-  -v                    increase verbosity
+  -h, --help              :show this help message and exit
+  -a NAME, --app NAME     :azure app service name
+  -r NAME, --rg NAME      :azure resource group
+  -e, --enable            :enable health check
+  -d, --disable           :disable health check
+  -C PATH, --config PATH  :path to azure configuration file
+  -v                      :increase verbosity
 ```
