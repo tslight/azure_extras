@@ -51,6 +51,7 @@ class AzureExtras:
             "Content-Type": "application/json",
         }
         self.url = f"https://management.azure.com/subscriptions/{self.az['sub_id']}"
+        logging.debug("HEADERS:\n" + json.dumps(self.headers))
 
     def toggle_health_check(self, rg, app, enable):
         url = f"{self.url}/resourceGroups/{rg}/providers/Microsoft.Web/sites/{app}/config/web"
