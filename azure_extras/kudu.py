@@ -1,4 +1,5 @@
 #!/usr/bin/env python
+import json
 import logging
 import os
 import sys
@@ -79,24 +80,78 @@ def mklog(verbosity):
     )
 
 
+def run_cmd(kudu, cmd, cwd):
+    print(f"Running {cmd} in {kudu.pp['web_url']}/{cwd}.. ", end="", flush="True")
+    try:
+        response = kudu.run_cmd(cmd, cwd)
+        if response["Error"] == "":
+            print("DONE.")
+        else:
+            print("FAILED.")
+            raise AssertionError(
+                +f"Exitcode: {response['ExitCode']} "
+                + f"Message: {response['Error']}".strip()
+            )
+        print(response["Output"].strip())
+    except Exception as error:
+        logging.error(error)
+
+
+def get_endpoint(kudu, endpoint):
+    print(f"Getting resource from {kudu.url}{endpoint}.. ", end="", flush="True")
+    try:
+        response = kudu.get_endpoint(endpoint)
+        print("Done.")
+        if response:
+            logging.info(f"{kudu.url}{endpoint}:")
+            print(json.dumps(response, indent=2, sort_keys=True))
+        else:
+            logging.info(f"{kudu.url}{endpoint} returned no data.")
+    except Exception as error:
+        print("FAILED.")
+        logging.error(error)
+
+
+def deploy_zip(kudu, path):
+    print(f"Deploying {path} to {kudu.pp['web_url']}.. ", end="", flush="True")
+    try:
+        response = kudu.deploy_zip(path)
+        print(f"DONE.") if response["complete"] else print(f"FAILED.")
+        logging.info("\n" + json.dumps(response, indent=2, sort_keys=True))
+    except Exception as error:
+        print(f"FAILED.")
+        logging.error(error)
+
+
+def download_zip(kudu, paths):
+    source, destination = paths
+    print(
+        f"Downloading zip from {kudu.url}{source} to {destination}.. ",
+        end="",
+        flush="True",
+    )
+    try:
+        response = kudu.download_zip(source, destination)
+        print("DONE.") if response.ok else print("FAILED.")
+    except Exception as error:
+        print(f"FAILED.")
+        logging.error(error)
+
+
 def main():
     args = get_args()
     mklog(args.v)
 
     kudu = KuduClient(args.config, args.rg, args.app)
 
-    try:
-        if args.cmd:
-            kudu.run_cmd(args.cmd, args.cwd)
-        elif args.endpoint:
-            kudu.get_endpoint(args.endpoint)
-        elif args.deploy_zip:
-            kudu.deploy_zip(args.deploy_zip)
-        elif args.download_zip:
-            source, destination = args.download_zip
-            kudu.download_zip(source, destination)
-    except Exception as error:
-        logging.error(error)
+    if args.cmd:
+        run_cmd(kudu, args.cmd, args.cwd)
+    elif args.endpoint:
+        get_endpoint(kudu, args.endpoint)
+    elif args.deploy_zip:
+        deploy_zip(kudu, args.deploy_zip)
+    elif args.download_zip:
+        download_zip(kudu, args.download_zip)
 
 
 if __name__ == "__main__":
