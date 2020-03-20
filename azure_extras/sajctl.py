@@ -1,13 +1,12 @@
 import os
 import logging
-import numpy as np
 import sys
 import time
 
 from argparse import ArgumentParser
 from concurrent.futures import ThreadPoolExecutor, as_completed
 from .lib.az import AzureExtras
-from .lib.utils import chkpath, mklog
+from .lib.utils import chkpath, get_seconds, mklog
 
 
 def get_args():
@@ -21,10 +20,10 @@ def get_args():
         help="path to azure configuration file",
     )
     parser.add_argument(
-        "-rg", "--resource_group", metavar=("NAME"), help="azure resource group"
+        "-r", "--resource_group", metavar=("NAME"), help="azure resource group"
     )
     parser.add_argument(
-        "-s",
+        "-j",
         "--stream_analytics_jobs",
         metavar=("JOBS"),
         nargs="+",
@@ -38,21 +37,6 @@ def get_args():
     )
     parser.add_argument("-v", action="count", default=0, help="increase verbosity")
     return parser.parse_args()
-
-
-def get_seconds(seconds=180):
-    # linear space
-    start, stop, step = 10, 100, 10
-    linspace = np.linspace(start, stop, step)
-    # calculate the exponential increments
-    # amplitude mult, exp amplitude, const adder
-    mult, exp, adder = 15, 0.01, -10
-    exp_list = mult * np.exp(exp * linspace) + adder
-    sec_list = [seconds]
-    sec_list.extend(exp_list)
-    logging.debug("Time steps: {}".format(sec_list))
-    logging.debug("Number of steps:{}".format(len(sec_list)))
-    return sec_list
 
 
 def check_job_status(az, rg, job, action):
