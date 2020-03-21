@@ -7,7 +7,7 @@ import traceback
 from configparser import ConfigParser
 from azure.common.credentials import ServicePrincipalCredentials
 from bs4 import BeautifulSoup
-from time import time
+from time import sleep, time
 
 
 def get_access_token(client_id, secret, tenant):
@@ -120,7 +120,7 @@ class AzureExtras:
                 )
 
             logging.info(f"Sent {action} to {job}")
-            timeout = time() + 60
+            timeout = time() + 120
             while time() < timeout:
                 logging.info(f"Checking status of {action} sent to {job}..")
                 results = self.get_stream_analytics_job(rg, job)
@@ -131,9 +131,11 @@ class AzureExtras:
                 if started or stopped:
                     logging.info(f"Successfully sent {action} to {job}.")
                     return results
+                logging.info(f"Waiting 10 seconds before checking again...")
+                sleep(10)
 
             raise AssertionError(
-                f"Failed to {action} {job}. Timeed out. Status: {status}"
+                f"Failed to {action} {job}. Timed out. Status: {status}"
             )
         except Exception as error:
             logging.debug(traceback.format_exc())
