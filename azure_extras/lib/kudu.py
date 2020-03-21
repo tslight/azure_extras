@@ -2,7 +2,7 @@ import json
 import logging
 import requests
 import traceback
-from .app_service import AppService
+from .app import AppService
 from time import time
 
 

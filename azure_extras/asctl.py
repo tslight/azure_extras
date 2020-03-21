@@ -3,7 +3,7 @@ import logging
 import os
 from argparse import ArgumentParser
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from .lib.app_service import AppService
+from .lib.app import AppService
 from .lib.utils import chkpath, mklog
 
 
