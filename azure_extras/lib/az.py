@@ -130,7 +130,7 @@ class AzureExtras:
                 stopped = action == "stop" and status == "Stopped"
                 if started or stopped:
                     logging.info(f"Successfully sent {action} to {job}.")
-                    return status
+                    return results
 
             raise AssertionError(
                 f"Failed to {action} {job}. Timeed out. Status: {status}"

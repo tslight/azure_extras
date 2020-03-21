@@ -42,7 +42,7 @@ def sajctl():
     mklog(args.v)
     az = AzureExtras(args.config)
 
-    print("Sending {args.action} to " + ", ".join(args.stream_analytics_jobs) + "...")
+    print(f"Sending {args.action} to " + ", ".join(args.stream_analytics_jobs) + "...")
 
     # http://masnun.com/2016/03/29/python-a-quick-introduction-to-the-concurrent-futures-module.html
     with ThreadPoolExecutor(max_workers=len(args.stream_analytics_jobs)) as executor:
@@ -54,14 +54,14 @@ def sajctl():
         }
         for future in as_completed(future_job):
             job = future_job[future]
-            print(f"Sending {args.action} to {job}.. ", end="", flush="True")
+            print(f"Status of {job}: ", end="", flush="True")
             try:
-                future.result()
+                result = future.result()
             except ValueError as error:
-                print(f"FAILED.")
+                print(f"FAILED")
                 logging.error(error)
             else:
-                print(f"DONE.")
+                print(result["properties"]["jobState"].upper())
 
 
 if __name__ == "__main__":
