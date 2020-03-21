@@ -2,20 +2,28 @@
 import logging
 import os
 from argparse import ArgumentParser
+from concurrent.futures import ThreadPoolExecutor, as_completed
 from .lib.az import AzureExtras
 from .lib.utils import chkpath, mklog
 
 
 def get_args():
     parser = ArgumentParser(description="Toggle health check in Azure App Service")
-    parser.add_argument("-a", "--app", metavar=("NAME"), help="azure app service name")
-    parser.add_argument("-r", "--rg", metavar=("NAME"), help="azure resource group")
-    group = parser.add_mutually_exclusive_group(required=True)
-    group.add_argument(
-        "-e", "--enable", action="store_true", help="enable health check"
+    parser.add_argument(
+        "-a",
+        "--app_services",
+        nargs="+",
+        metavar=("NAME"),
+        help="list of azure app services",
     )
-    group.add_argument(
-        "-d", "--disable", action="store_true", help="disable health check"
+    parser.add_argument(
+        "-r", "--resource_group", metavar=("NAME"), help="azure resource group"
+    )
+    parser.add_argument(
+        "-A",
+        "--action",
+        metavar=("ENABLE/DISABLE"),
+        help="action to carry out - enable or disable.",
     )
     parser.add_argument(
         "-C",
@@ -34,17 +42,24 @@ def main():
     mklog(args.v)
     az = AzureExtras(args.config)
 
-    try:
-        if args.enable:
-            print(f"Enabling Health Check on {args.app}.. ", end="", flush="True")
-            az.toggle_health_check(args.rg, args.app, enable=True)
-        elif args.disable:
-            print(f"Disabling Health Check on {args.app}.. ", end="", flush="True")
-            az.toggle_health_check(args.rg, args.app, enable=False)
-        print("DONE.")
-    except Exception as error:
-        print("FAIL.")
-        logging.error(error)
+    # http://masnun.com/2016/03/29/python-a-quick-introduction-to-the-concurrent-futures-module.html
+    with ThreadPoolExecutor(max_workers=len(args.app_services)) as executor:
+        future_app = {
+            executor.submit(
+                az.toggle_health_check, args.resource_group, app, args.action
+            ): app
+            for app in args.app_services
+        }
+        for future in as_completed(future_app):
+            app = future_app[future]
+            print(f"Sending {args.action} to {app}.. ", end="", flush="True")
+            try:
+                future.result()
+            except ValueError as error:
+                print(f"FAILED.")
+                logging.error(error)
+            else:
+                print(f"DONE.")
 
 
 if __name__ == "__main__":

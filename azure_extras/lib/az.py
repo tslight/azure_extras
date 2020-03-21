@@ -53,14 +53,16 @@ class AzureExtras:
         self.url = f"https://management.azure.com/subscriptions/{self.az['sub_id']}"
         logging.debug("HEADERS:\n" + json.dumps(self.headers))
 
-    def toggle_health_check(self, rg, app, enable):
+    def toggle_health_check(self, rg, app, action):
         url = f"{self.url}/resourceGroups/{rg}/providers/Microsoft.Web/sites/{app}/config/web"
         params = {"api-version": "2018-02-01"}
 
-        if enable:
+        if action == "enable":
             patch = {"properties": {"healthCheckPath": "/status/status.cshtml"}}
-        else:
+        elif action == "disable":
             patch = {"properties": {"healthCheckPath": "null"}}
+        else:
+            raise ValueError(f"{action} is invalid!")
 
         try:
             response = requests.patch(

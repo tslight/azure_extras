@@ -54,18 +54,22 @@ Workaround until
 is implemented in [terraform](https://github.com/terraform-providers/terraform-provider-azurerm/issues/5147)
 
 ``` text
-usage: az-health-check [-h] [-a NAME] [-r NAME] (-e | -d) [-C PATH] [-v]
+usage: az-chkhealth [-h] [-a NAME [NAME ...]] [-r NAME] [-A ENABLE/DISABLE]
+					[-C PATH] [-v]
 
 Toggle health check in Azure App Service
 
 optional arguments:
-  -h, --help              :show this help message and exit
-  -a NAME, --app NAME     :azure app service name
-  -r NAME, --rg NAME      :azure resource group
-  -e, --enable            :enable health check
-  -d, --disable           :disable health check
-  -C PATH, --config PATH  :path to azure configuration file
-  -v                      :increase verbosity
+  -h, --help            show this help message and exit
+  -a NAME [NAME ...], --app_services NAME [NAME ...]
+						list of azure app services
+  -r NAME, --resource_group NAME
+						azure resource group
+  -A ENABLE/DISABLE, --action ENABLE/DISABLE
+						action to carry out - enable or disable.
+  -C PATH, --config PATH
+						path to azure configuration file
+  -v                    increase verbosity
 ```
 
 ## STREAM ANALYTICS CONTROLLER
