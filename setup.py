@@ -24,7 +24,7 @@ setuptools.setup(
     ),
     entry_points={
         "console_scripts": [
-            "az-kudu = azure_extras.kuductl:main",
+            "az-kuductl = azure_extras.kuductl:main",
             "az-sajctl = azure_extras.sajctl:main",
             "az-healthchkctl = azure_extras.healthchkctl:main",
         ],
