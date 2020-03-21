@@ -7,12 +7,12 @@ from time import time, sleep
 
 
 class StreamAnalyticsJobs(AzureExtras):
-    def __init__(self, config_path):
-        super().__init__(config_path)
-        self.provider = "providers/Microsoft.StreamAnalytics/streamingjobs"
+    def __init__(self, path, rg):
+        super().__init__(path, rg)
+        self.url = f"{self.url}/providers/Microsoft.StreamAnalytics/streamingjobs"
 
-    def get_stream_analytics_job(self, rg, job):
-        url = f"{self.url}/resourceGroups/{rg}/{self.provider}/{job}"
+    def get_stream_analytics_job(self, job):
+        url = f"{self.url}/{job}"
         params = {
             "api-version": "2015-10-01",
             "$expand": "inputs,transformation,outputs,functions",
@@ -33,8 +33,8 @@ class StreamAnalyticsJobs(AzureExtras):
 
         return body
 
-    def toggle_stream_analytics_job(self, rg, job, action):
-        url = f"{self.url}/resourceGroups/{rg}/{self.provider}/{job}/{action}"
+    def toggle_stream_analytics_job(self, job, action):
+        url = f"{self.url}/{job}/{action}"
         params = {"api-version": "2015-10-01"}
 
         try:
@@ -50,7 +50,7 @@ class StreamAnalyticsJobs(AzureExtras):
             timeout = time() + 120
             while time() < timeout:
                 logging.info(f"Checking status of {action} sent to {job}..")
-                results = self.get_stream_analytics_job(rg, job)
+                results = self.get_stream_analytics_job(job)
                 status = results["properties"]["jobState"]
                 logging.debug(f"RESULTS: {status}")
                 started = action == "start" and status == "Running"

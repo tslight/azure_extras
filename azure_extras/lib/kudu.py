@@ -2,18 +2,18 @@ import json
 import logging
 import requests
 import traceback
-from .az import AzureExtras
+from .app_service import AppService
 from time import time
 
 
-class KuduClient(AzureExtras):
+class KuduClient(AppService):
     """
     https://github.com/projectkudu/kudu/wiki/REST-API
     """
 
-    def __init__(self, config_path, rg, app):
-        super().__init__(config_path)
-        self.pp = self.get_publish_profile(rg, app)
+    def __init__(self, path, rg, app):
+        super().__init__(path, rg)
+        self.pp = self.get_publish_profile(app)
         self.url = (
             self.pp["web_url"]
             .replace("http://", "https://")

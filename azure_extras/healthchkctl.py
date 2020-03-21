@@ -38,12 +38,12 @@ def get_args():
 
 
 def healthchkctl(config, rg, apps, action):
-    app_service = AppService(config)
+    app_service = AppService(config, rg)
 
     # http://masnun.com/2016/03/29/python-a-quick-introduction-to-the-concurrent-futures-module.html
     with ThreadPoolExecutor(max_workers=len(apps)) as executor:
         future_app = {
-            executor.submit(app_service.toggle_health_check, rg, app, action): app
+            executor.submit(app_service.toggle_health_check, app, action): app
             for app in apps
         }
         for future in as_completed(future_app):

@@ -38,13 +38,13 @@ def get_args():
 
 
 def sajctl(config, rg, jobs, action):
-    saj = StreamAnalyticsJobs(config)
+    saj = StreamAnalyticsJobs(config, rg)
     print(f"Sending {action} to " + ", ".join(jobs) + "...")
 
     # http://masnun.com/2016/03/29/python-a-quick-introduction-to-the-concurrent-futures-module.html
     with ThreadPoolExecutor(max_workers=len(jobs)) as executor:
         future_job = {
-            executor.submit(saj.toggle_stream_analytics_job, rg, job, action): job
+            executor.submit(saj.toggle_stream_analytics_job, job, action): job
             for job in jobs
         }
         for future in as_completed(future_job):
