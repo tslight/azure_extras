@@ -7,6 +7,7 @@ import traceback
 from configparser import ConfigParser
 from azure.common.credentials import ServicePrincipalCredentials
 from bs4 import BeautifulSoup
+from time import time
 
 
 def get_access_token(client_id, secret, tenant):
@@ -111,19 +112,32 @@ class AzureExtras:
 
         try:
             response = requests.post(url, headers=self.headers, params=params)
-            body = json.loads(response.content if response.content else "{}")
-            logging.debug(json.dumps(body))
             if response.ok is False:
                 raise AssertionError(
                     f"Failed to {action} {job} using {url}\n"
                     + f"Response Code: {response.status_code}\n"
                     + f"Response Reason: {response.reason}"
                 )
+
+            logging.info(f"Sent {action} to {job}")
+            timeout = time() + 60
+            while time() < timeout:
+                logging.info(f"Checking status of {action} sent to {job}..")
+                results = self.get_stream_analytics_job(rg, job)
+                status = results["properties"]["jobState"]
+                logging.debug(f"RESULTS: {status}")
+                started = action == "start" and status == "Running"
+                stopped = action == "stop" and status == "Stopped"
+                if started or stopped:
+                    logging.info(f"Successfully sent {action} to {job}.")
+                    return status
+
+            raise AssertionError(
+                f"Failed to {action} {job}. Timeed out. Status: {status}"
+            )
         except Exception as error:
             logging.debug(traceback.format_exc())
             raise error
-
-        return body
 
     def get_publish_profile(self, rg, app):
         """
