@@ -60,7 +60,7 @@ def check_job_status(az, rg, job, action):
     logging.critical(f"{job} timed out after {sum(seconds)} seconds. Aborting.")
 
 
-def main():
+def sajctl():
     args = get_args()
     mklog(args.v)
     az = AzureExtras(args.config)
@@ -105,3 +105,7 @@ def main():
                 sys.exit(1)
             else:
                 print(f"DONE.")
+
+
+if __name__ == "__main__":
+    sajctl()

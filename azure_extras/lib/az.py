@@ -135,7 +135,6 @@ class AzureExtras:
 
         try:
             response = requests.post(url, headers=self.headers, params=params)
-            body = json.loads(response.content if response.content else "{}")
             if response.ok:
                 soup = BeautifulSoup(response.text, features="html.parser")
                 logging.debug(f"Response XML:\n\n{soup.prettify()}\n")
@@ -160,7 +159,7 @@ class AzureExtras:
                 )
                 return publish_profile
 
-            logging.debug("\n" + json.dumps(body, indent=2, sort_keys=True))
+            logging.debug("\n" + json.dumps(response.json(), indent=2, sort_keys=True))
             raise AssertionError(
                 f"Failed to get PublishProfile using {url}\n"
                 + f"Response Code: {response.status_code}\n"

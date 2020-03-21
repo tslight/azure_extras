@@ -37,7 +37,7 @@ def get_args():
     return parser.parse_args()
 
 
-def main():
+def chkhealth():
     args = get_args()
     mklog(args.v)
     az = AzureExtras(args.config)
@@ -63,4 +63,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    chkhealth()

@@ -111,7 +111,7 @@ def download_zip(kudu, paths):
         logging.error(error)
 
 
-def main():
+def kudu():
     args = get_args()
     mklog(args.v)
 
@@ -128,4 +128,4 @@ def main():
 
 
 if __name__ == "__main__":
-    main()
+    kudu()
