@@ -30,8 +30,7 @@ class AzureExtras:
         if az:
             logging.info(f"Found Azure configuration at {path}.")
             return az["client"], az["secret"], az["tenant"], az["sub"]
-        else:
-            logging.error(f"Failed to retrieve Azure details from {path}. Aborting.")
+        logging.error(f"Failed to retrieve Azure details from {path}. Aborting.")
 
     def get_access_token(self):
         try:

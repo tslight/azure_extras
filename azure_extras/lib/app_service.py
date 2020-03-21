@@ -93,7 +93,7 @@ class AppService(AzureExtras):
         https://docs.microsoft.com/en-us/rest/api/appservice/webapps/start
         https://docs.microsoft.com/en-us/rest/api/appservice/webapps/stop
         """
-        logging.debug(f"{action.capitalize()} {app_name}")
+        logging.debug(f"{action.capitalize()} {app}")
         url = f"{self.url}/{app}/{action}"
         params = {"api-version": "2016-08-01"}
 
