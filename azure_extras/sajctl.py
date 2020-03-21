@@ -3,7 +3,7 @@ import logging
 
 from argparse import ArgumentParser
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from .lib.az import AzureExtras
+from .lib.saj import StreamAnalyticsJobs
 from .lib.utils import chkpath, mklog
 
 
@@ -37,20 +37,15 @@ def get_args():
     return parser.parse_args()
 
 
-def sajctl():
-    args = get_args()
-    mklog(args.v)
-    az = AzureExtras(args.config)
-
-    print(f"Sending {args.action} to " + ", ".join(args.stream_analytics_jobs) + "...")
+def sajctl(config, rg, jobs, action):
+    saj = StreamAnalyticsJobs(config)
+    print(f"Sending {action} to " + ", ".join(jobs) + "...")
 
     # http://masnun.com/2016/03/29/python-a-quick-introduction-to-the-concurrent-futures-module.html
-    with ThreadPoolExecutor(max_workers=len(args.stream_analytics_jobs)) as executor:
+    with ThreadPoolExecutor(max_workers=len(jobs)) as executor:
         future_job = {
-            executor.submit(
-                az.toggle_stream_analytics_job, args.resource_group, job, args.action
-            ): job
-            for job in args.stream_analytics_jobs
+            executor.submit(saj.toggle_stream_analytics_job, rg, job, action): job
+            for job in jobs
         }
         for future in as_completed(future_job):
             job = future_job[future]
@@ -64,5 +59,11 @@ def sajctl():
                 print(result["properties"]["jobState"].upper())
 
 
+def main():
+    args = get_args()
+    mklog(args.v)
+    sajctl(args.config, args.resource_group, args.stream_analytics_jobs, args.action)
+
+
 if __name__ == "__main__":
-    sajctl()
+    main()

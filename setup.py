@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="azure_extras",
-    version="0.1.3",
+    version="0.1.4",
     author="Toby Slight",
     author_email="tslight@pm.me",
     description="The stuff Microsoft left out..",
@@ -24,9 +24,9 @@ setuptools.setup(
     ),
     entry_points={
         "console_scripts": [
-            "az-kudu = azure_extras.kudu:kudu",
-            "az-sajctl = azure_extras.sajctl:sajctl",
-            "az-chkhealth = azure_extras.health_check:chkhealth",
+            "az-kudu = azure_extras.kudu:main",
+            "az-sajctl = azure_extras.sajctl:main",
+            "az-healthchkctl = azure_extras.healthchkctl:main",
         ],
     },
 )

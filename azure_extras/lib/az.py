@@ -2,141 +2,46 @@ import json
 import logging
 import re
 import requests
-import sys
 import traceback
 from configparser import ConfigParser
 from azure.common.credentials import ServicePrincipalCredentials
 from bs4 import BeautifulSoup
-from time import sleep, time
-
-
-def get_access_token(client_id, secret, tenant):
-    try:
-        credentials = ServicePrincipalCredentials(
-            client_id=client_id, secret=secret, tenant=tenant,
-        )
-        access_token = credentials.token["access_token"]
-        logging.debug(f"Access Token:\n\n{access_token}\n")
-        return access_token
-    except Exception as error:
-        logging.debug(traceback.format_exc())
-        raise error
-
-
-def get_az_details(path):
-    try:
-        config = ConfigParser()
-        config.read(path)
-        az_details = config["azure"]
-    except Exception as error:
-        logging.error(f"Failed to retrieve config from {path}. Aborting.")
-        logging.error(error)
-        sys.exit(1)
-
-    if az_details:
-        logging.info(f"Found Azure configuration at {path}.")
-        return az_details
-
-    logging.error(f"Failed to retrieve Azure details from {path}. Aborting.")
-    sys.exit(1)
 
 
 class AzureExtras:
-    def __init__(self, config_path):
-        self.az = get_az_details(config_path)
-        token = get_access_token(
-            self.az["client_id"], self.az["secret"], self.az["tenant"]
-        )
+    def __init__(self, path):
+        self.client, self.secret, self.tenant, self.sub = self.get_config(path)
+        token = self.get_access_token()
         self.headers = {
             "Authorization": f"Bearer {token}",
             "Content-Type": "application/json",
         }
-        self.url = f"https://management.azure.com/subscriptions/{self.az['sub_id']}"
+        self.url = f"https://management.azure.com/subscriptions/{self.sub}"
         logging.debug("HEADERS:\n" + json.dumps(self.headers))
 
-    def toggle_health_check(self, rg, app, action):
-        url = f"{self.url}/resourceGroups/{rg}/providers/Microsoft.Web/sites/{app}/config/web"
-        params = {"api-version": "2018-02-01"}
+    def get_config(self, path):
+        try:
+            config = ConfigParser()
+            config.read(path)
+            az = config["azure"]
+        except Exception as error:
+            logging.error(f"Failed to retrieve config from {path}. Aborting.")
+            logging.error(error)
 
-        if action == "enable":
-            patch = {"properties": {"healthCheckPath": "/status/status.cshtml"}}
-        elif action == "disable":
-            patch = {"properties": {"healthCheckPath": "null"}}
+        if az:
+            logging.info(f"Found Azure configuration at {path}.")
+            return az["client"], az["secret"], az["tenant"], az["sub"]
         else:
-            raise ValueError(f"{action} is invalid!")
+            logging.error(f"Failed to retrieve Azure details from {path}. Aborting.")
 
+    def get_access_token(self):
         try:
-            response = requests.patch(
-                url, headers=self.headers, params=params, data=json.dumps(patch)
+            credentials = ServicePrincipalCredentials(
+                client_id=self.client, secret=self.secret, tenant=self.tenant,
             )
-            content = response.json()
-            success = (
-                content["properties"]["healthCheckPath"]
-                == patch["properties"]["healthCheckPath"]
-            )
-            logging.debug(json.dumps(content, indent=2, sort_keys=True))
-            if response.ok is False or success is False:
-                raise AssertionError(
-                    f"Failed to patch {url} with {patch}\n"
-                    + f"Code:{response.status_code}"
-                )
-        except Exception as error:
-            logging.debug(traceback.format_exc())
-            raise error
-
-    def get_stream_analytics_job(self, rg, job):
-        url = f"{self.url}/resourceGroups/{rg}/providers/Microsoft.StreamAnalytics/streamingjobs/{job}"
-        params = {
-            "api-version": "2015-10-01",
-            "$expand": "inputs,transformation,outputs,functions",
-        }
-        try:
-            response = requests.get(url, headers=self.headers, params=params)
-            body = json.loads(response.content if response.content else "{}")
-            logging.debug(json.dumps(body))
-            if response.ok is False:
-                raise AssertionError(
-                    f"Failed to get {job} status from {url}\n"
-                    + f"Response Code: {response.status_code}\n"
-                    + f"Response Reason: {response.reason}"
-                )
-        except Exception as error:
-            logging.debug(traceback.format_exc())
-            raise error
-
-        return body
-
-    def toggle_stream_analytics_job(self, rg, job, action):
-        url = f"{self.url}/resourceGroups/{rg}/providers/Microsoft.StreamAnalytics/streamingjobs/{job}/{action}"
-        params = {"api-version": "2015-10-01"}
-
-        try:
-            response = requests.post(url, headers=self.headers, params=params)
-            if response.ok is False:
-                raise AssertionError(
-                    f"Failed to {action} {job} using {url}\n"
-                    + f"Response Code: {response.status_code}\n"
-                    + f"Response Reason: {response.reason}"
-                )
-
-            logging.info(f"Sent {action} to {job}")
-            timeout = time() + 120
-            while time() < timeout:
-                logging.info(f"Checking status of {action} sent to {job}..")
-                results = self.get_stream_analytics_job(rg, job)
-                status = results["properties"]["jobState"]
-                logging.debug(f"RESULTS: {status}")
-                started = action == "start" and status == "Running"
-                stopped = action == "stop" and status == "Stopped"
-                if started or stopped:
-                    logging.info(f"Successfully sent {action} to {job}.")
-                    return results
-                logging.info(f"Waiting 10 seconds before checking again...")
-                sleep(10)
-
-            raise AssertionError(
-                f"Failed to {action} {job}. Timed out. Status: {status}"
-            )
+            access_token = credentials.token["access_token"]
+            logging.debug(f"Access Token:\n\n{access_token}\n")
+            return access_token
         except Exception as error:
             logging.debug(traceback.format_exc())
             raise error

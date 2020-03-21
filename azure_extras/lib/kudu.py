@@ -6,14 +6,14 @@ from .az import AzureExtras
 from time import time
 
 
-class KuduClient:
+class KuduClient(AzureExtras):
     """
     https://github.com/projectkudu/kudu/wiki/REST-API
     """
 
     def __init__(self, config_path, rg, app):
-        az = AzureExtras(config_path)
-        self.pp = az.get_publish_profile(rg, app)
+        super().__init__(config_path)
+        self.pp = self.get_publish_profile(rg, app)
         self.url = (
             self.pp["web_url"]
             .replace("http://", "https://")

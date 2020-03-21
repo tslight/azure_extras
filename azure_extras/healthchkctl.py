@@ -3,7 +3,7 @@ import logging
 import os
 from argparse import ArgumentParser
 from concurrent.futures import ThreadPoolExecutor, as_completed
-from .lib.az import AzureExtras
+from .lib.app_service import AppService
 from .lib.utils import chkpath, mklog
 
 
@@ -37,22 +37,18 @@ def get_args():
     return parser.parse_args()
 
 
-def chkhealth():
-    args = get_args()
-    mklog(args.v)
-    az = AzureExtras(args.config)
+def healthchkctl(config, rg, apps, action):
+    app_service = AppService(config)
 
     # http://masnun.com/2016/03/29/python-a-quick-introduction-to-the-concurrent-futures-module.html
-    with ThreadPoolExecutor(max_workers=len(args.app_services)) as executor:
+    with ThreadPoolExecutor(max_workers=len(apps)) as executor:
         future_app = {
-            executor.submit(
-                az.toggle_health_check, args.resource_group, app, args.action
-            ): app
-            for app in args.app_services
+            executor.submit(app_service.toggle_health_check, rg, app, action): app
+            for app in apps
         }
         for future in as_completed(future_app):
             app = future_app[future]
-            print(f"Sending {args.action} to {app}.. ", end="", flush="True")
+            print(f"Sending {action} to {app}.. ", end="", flush="True")
             try:
                 future.result()
             except ValueError as error:
@@ -62,5 +58,11 @@ def chkhealth():
                 print(f"DONE.")
 
 
+def main():
+    args = get_args()
+    mklog(args.v)
+    healthchkctl(args.config, args.resource_group, args.app_services, args.action)
+
+
 if __name__ == "__main__":
-    chkhealth()
+    main()
