@@ -44,7 +44,7 @@ def check_job_status(az, rg, job, action):
     This function makes sure the Stream Analytics Job identified by the input
     parameter 'job' is actually up and running.
     """
-    seconds = get_seconds(seconds=30)
+    seconds = get_seconds(seconds=15)
     for sec in seconds:
         status = az.get_stream_analytics_job(rg, job)["properties"]["jobState"]
         started = action == "start" and status == "Running"
@@ -84,6 +84,8 @@ def main():
                 sys.exit(1)
             else:
                 print(f"DONE.")
+
+    print("Checking status of " + ", ".join(args.stream_analytics_jobs) + "...")
 
     with ThreadPoolExecutor(max_workers=len(args.stream_analytics_jobs)) as executor:
         future_job = {
