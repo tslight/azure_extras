@@ -115,16 +115,16 @@ def kudu():
     args = get_args()
     mklog(args.v)
 
-    kudu = KuduClient(args.config, args.rg, args.app)
+    kuduclient = KuduClient(args.config, args.rg, args.app)
 
     if args.cmd:
-        run_cmd(kudu, args.cmd, args.cwd)
+        run_cmd(kuduclient, args.cmd, args.cwd)
     elif args.endpoint:
-        get_endpoint(kudu, args.endpoint)
+        get_endpoint(kuduclient, args.endpoint)
     elif args.deploy_zip:
-        deploy_zip(kudu, args.deploy_zip)
+        deploy_zip(kuduclient, args.deploy_zip)
     elif args.download_zip:
-        download_zip(kudu, args.download_zip)
+        download_zip(kuduclient, args.download_zip)
 
 
 if __name__ == "__main__":
