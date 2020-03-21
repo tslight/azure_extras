@@ -1,11 +1,6 @@
-# THE STUFF MICROSOFT LEFT OUT
+# AZURE API EXTRAS
 
 W.I.P. Azure stuff to make my life easier.
-
-So far just a couple of classes and interactive scripts to make dealing with
-Azure App Services less painful from a DevOps perspective.
-
-Oh, and one for stopping and starting Azure Stream Analytics Jobs.
 
 ## INSTALLATION
 
@@ -18,7 +13,7 @@ your subscription and tenant details along the way.
 
 This location can be customised with the `--config` flag at runtime.
 
-## APP SERVICE KUDU API CLI FRONTEND
+## KUDU API CLI FRONTEND
 
 https://github.com/projectkudu/kudu
 
@@ -57,7 +52,7 @@ is implemented in [terraform](https://github.com/terraform-providers/terraform-p
 usage: az-chkhealth [-h] [-a NAME [NAME ...]] [-r NAME] [-A ENABLE/DISABLE]
 					[-C PATH] [-v]
 
-Toggle health check in Azure App Service
+Enable or disable Health Check in Azure App Services
 
 optional arguments:
   -h, --help            show this help message and exit
@@ -72,13 +67,34 @@ optional arguments:
   -v                    increase verbosity
 ```
 
-## STREAM ANALYTICS CONTROLLER
+## APP SERVICES CONTROLLER
+
+``` text
+usage: az-asctl [-h] [-a NAME [NAME ...]] [-r NAME] [-A START/STOP] [-C PATH]
+				[-v]
+
+Start or stop Azure App Services and their slots
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -a NAME [NAME ...], --app_services NAME [NAME ...]
+						list of azure app services
+  -r NAME, --resource_group NAME
+						azure resource group
+  -A START/STOP, --action START/STOP
+						action to carry out - enable or disable.
+  -C PATH, --config PATH
+						path to azure configuration file
+  -v                    increase verbosity
+```
+
+## STREAM ANALYTICS JOBS CONTROLLER
 
 ``` text
 usage: az-sajctl [-h] [-C PATH] [-r NAME] [-j JOBS [JOBS ...]] [-a START/STOP]
 				 [-v]
 
-Stream Analytics Jobs Controller
+Start or stop Stream Analytics Jobs
 
 optional arguments:
   -h, --help            show this help message and exit

@@ -8,7 +8,9 @@ from .lib.utils import chkpath, mklog
 
 
 def get_args():
-    parser = ArgumentParser(description="Toggle health check in Azure App Service")
+    parser = ArgumentParser(
+        description="Enable or disable Health check in Azure App Services"
+    )
     parser.add_argument(
         "-a",
         "--app_services",

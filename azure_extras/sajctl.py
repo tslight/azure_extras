@@ -8,7 +8,7 @@ from .lib.utils import chkpath, mklog
 
 
 def get_args():
-    parser = ArgumentParser(description="Stream Analytics Jobs Controller")
+    parser = ArgumentParser(description="Start or stop Stream Analytics Jobs")
     parser.add_argument(
         "-C",
         "--config",

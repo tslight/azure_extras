@@ -8,7 +8,9 @@ from .lib.utils import chkpath, mklog
 
 
 def get_args():
-    parser = ArgumentParser(description="Toggle health check in Azure App Service")
+    parser = ArgumentParser(
+        description="Start or stop Azure App Services and their slots"
+    )
     parser.add_argument(
         "-a",
         "--app_services",
@@ -50,12 +52,36 @@ def asctl(config, rg, apps, action):
             app = future_app[future]
             print(f"Sending {action} to {app}.. ", end="", flush="True")
             try:
-                future.result()
+                result = future.result()
             except ValueError as error:
                 print(f"FAILED.")
                 logging.error(error)
             else:
-                print(f"DONE.")
+                print(result.upper() + ".")
+
+    for app in apps:
+        slots = [
+            slot["name"].split("/")[1]
+            for slot in app_service.list_app_service_slots(app)["value"]
+        ]
+        logging.info("Found " + ", ".join(slots) + " slots for " + app)
+        with ThreadPoolExecutor(max_workers=len(slots)) as executor:
+            future_slot = {
+                executor.submit(
+                    app_service.toggle_app_service_slot, app, slot, action
+                ): slot
+                for slot in slots
+            }
+            for future in as_completed(future_slot):
+                slot = future_slot[future]
+                print(f"Sending {action} to {slot}.. ", end="", flush="True")
+                try:
+                    result = future.result()
+                except ValueError as error:
+                    print(f"FAILED.")
+                    logging.error(error)
+                else:
+                    print(result.upper() + ".")
 
 
 def main():
