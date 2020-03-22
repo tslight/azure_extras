@@ -2,7 +2,7 @@ import json
 import logging
 import requests
 import traceback
-from time import time, sleep
+from time import time
 from .az import AzureExtras
 
 
