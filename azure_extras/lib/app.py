@@ -2,7 +2,7 @@ import json
 import logging
 import requests
 import traceback
-from time import time
+from time import time, sleep
 from .az import AzureExtras
 
 
@@ -56,6 +56,12 @@ class AppService(AzureExtras):
                     f"Failed to patch {url} with {patch}\n"
                     + f"Code:{response.status_code}"
                 )
+        except requests.exceptions.ConnectionError as error:
+            logging.warning("Transient connection issue. Trying again...")
+            logging.debug(error)
+            timeout = time() + 10
+            while time() < timeout:
+                return self.toggle_health_check(app, action)
         except Exception as error:
             logging.debug(traceback.format_exc())
             raise error
@@ -136,6 +142,12 @@ class AppService(AzureExtras):
                     return status
 
             raise AssertionError(f"Failed to {action} {app}: {status}")
+        except requests.exceptions.ConnectionError as error:
+            logging.warning("Transient connection issue. Trying again...")
+            logging.debug(error)
+            timeout = time() + 10
+            while time() < timeout:
+                return self.toggle_app_service(app, action)
         except Exception as error:
             logging.error(f"Failed to {action} {app}: {error}")
             logging.debug(traceback.format_exc())
@@ -165,6 +177,12 @@ class AppService(AzureExtras):
                     return status
 
             raise AssertionError(f"Failed to {action} {slot}: {status}")
+        except requests.exceptions.ConnectionError as error:
+            logging.warning("Transient connection issue. Trying again...")
+            logging.debug(error)
+            timeout = time() + 10
+            while time() < timeout:
+                return self.toggle_app_service_slot(app, slot, action)
         except Exception as error:
             logging.error(f"Failed to {action} {slot}: {error}")
             logging.debug(traceback.format_exc())
