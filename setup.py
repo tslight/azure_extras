@@ -8,7 +8,7 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="azure_extras",
-    version="0.1.7",
+    version="0.1.8",
     author="Toby Slight",
     author_email="tslight@pm.me",
     description="The stuff Microsoft left out..",
