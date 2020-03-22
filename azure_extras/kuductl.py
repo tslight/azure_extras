@@ -54,7 +54,7 @@ def get_args():
 
 
 def run_cmd(kudu, cmd, cwd):
-    print(f"Running {cmd} in {kudu.pp['web_url']}/{cwd}.. ", end="", flush="True")
+    print(f"Running {cmd} in {kudu.app}/{cwd}.. ", end="", flush="True")
     try:
         response = kudu.run_cmd(cmd, cwd)
         if response["Error"] == "":
@@ -71,22 +71,22 @@ def run_cmd(kudu, cmd, cwd):
 
 
 def get_endpoint(kudu, endpoint):
-    print(f"Getting resource from {kudu.url}{endpoint}.. ", end="", flush="True")
+    print(f"Getting resource from {kudu.app}/{endpoint}.. ", end="", flush="True")
     try:
         response = kudu.get_endpoint(endpoint)
         print("Done.")
         if response:
-            logging.info(f"{kudu.url}{endpoint}:")
+            logging.info(f"{kudu.app}{endpoint}:")
             print(json.dumps(response, indent=2, sort_keys=True))
         else:
-            logging.info(f"{kudu.url}{endpoint} returned no data.")
+            logging.info(f"{kudu.app}{endpoint} returned no data.")
     except Exception as error:
         print("FAILED.")
         logging.error(error)
 
 
 def deploy_zip(kudu, path):
-    print(f"Deploying {path} to {kudu.pp['web_url']}.. ", end="", flush="True")
+    print(f"Deploying {path} to {kudu.app}.. ", end="", flush="True")
     try:
         response = kudu.deploy_zip(path)
         print(f"DONE.") if response["complete"] else print(f"FAILED.")
@@ -99,7 +99,7 @@ def deploy_zip(kudu, path):
 def download_zip(kudu, paths):
     source, destination = paths
     print(
-        f"Downloading zip from {kudu.url}{source} to {destination}.. ",
+        f"Downloading zip from {kudu.app}/{source} to {destination}.. ",
         end="",
         flush="True",
     )

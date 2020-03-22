@@ -1,9 +1,7 @@
 import json
 import logging
-import re
 import requests
 import traceback
-from bs4 import BeautifulSoup
 from time import time
 from .az import AzureExtras
 
@@ -13,46 +11,20 @@ class AppService(AzureExtras):
         super().__init__(path, rg)
         self.url = f"{self.url}/providers/Microsoft.Web/sites"
 
-    def get_publish_profile(self, app):
+    def get_publishing_credentials(self, app):
         """
-        Get FTP and Web App credentials (username, password, hostname)
-        https://docs.microsoft.com/en-us/rest/api/appservice/webapps/listpublishingprofilexmlwithsecrets
+        https://docs.microsoft.com/en-us/rest/api/appservice/webapps/listpublishingcredentials
         """
-        url = f"{self.url}/{app}/publishxml"
-        params = {"api-version": "2016-08-01"}
+        url = f"{self.url}/{app}/config/publishingcredentials/list"
+        params = {"api-version": "2019-08-01"}
 
         try:
             response = requests.post(url, headers=self.headers, params=params)
             if response.ok:
-                soup = BeautifulSoup(response.text, features="html.parser")
-                logging.debug(f"Response XML:\n\n{soup.prettify()}\n")
-
-                web_pp = soup.select("publishProfile")[0]
-                ftp_pp = soup.select("publishProfile")[1]
-                ftp_host = re.search(
-                    r"ftp:\/\/(.*)/site/wwwroot", ftp_pp["publishurl"], re.IGNORECASE
-                ).group(1)
-
-                publish_profile = {
-                    "web_url": web_pp["destinationappurl"],
-                    "web_user": web_pp["username"],
-                    "web_passwd": web_pp["userpwd"],
-                    "ftp_host": ftp_host,
-                    "ftp_user": ftp_pp["username"],
-                    "ftp_passwd": ftp_pp["userpwd"],
-                }
-
-                logging.debug(
-                    "Publish Profile:\n" + json.dumps(publish_profile, indent=2)
-                )
-                return publish_profile
-
-            logging.debug("\n" + json.dumps(response.json(), indent=2, sort_keys=True))
+                logging.debug(json.dumps(response.json(), indent=2))
+                return response.json()["properties"]
             raise AssertionError(
-                f"Failed to get PublishProfile using {url}\n"
-                + f"Response Code: {response.status_code}\n"
-                + f"Response Message: {body['error']['message']}\n"
-                + f"Response Reason: {response.reason}"
+                f"Failed to get publishing credentials for {app}: {response.status_code}"
             )
         except Exception as error:
             logging.debug(traceback.format_exc())

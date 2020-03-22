@@ -13,17 +13,9 @@ class KuduClient(AppService):
 
     def __init__(self, path, rg, app):
         super().__init__(path, rg)
-        self.pp = self.get_publish_profile(app)
-        self.url = (
-            self.pp["web_url"]
-            .replace("http://", "https://")
-            .replace("azurewebsites", "scm.azurewebsites")
-            + "/api/"
-        )
-        self.auth = (self.pp["web_user"], self.pp["web_passwd"])
-        logging.debug(f"URL: {self.pp['web_url']}")
-        logging.debug(f"KUDU URL: {self.url}")
-        logging.debug(f"USER: {self.pp['web_user']}, PASS: {self.pp['web_passwd']}")
+        self.app = app
+        self.url = self.get_publishing_credentials(app)["scmUri"] + "/api/"
+        logging.debug(self.url)
 
     def deploy_zip(self, path):
         """
@@ -36,15 +28,16 @@ class KuduClient(AppService):
             with open(path, "rb") as f:
                 zipfile = f.read()
 
-            response = requests.put(
-                self.url + "zipdeploy?isAsync=true", auth=self.auth, data=zipfile
-            )
+            response = requests.put(self.url + "zipdeploy?isAsync=true", data=zipfile)
 
             if response.ok:
                 timeout = time() + 60
                 while time() < timeout:
                     logging.debug(f"Checking deployment {response.headers['Location']}")
-                    status = requests.get(response.headers["Location"], auth=self.auth)
+                    status = requests.get(
+                        response.headers["Location"], headers=self.headers
+                    )
+                    logging.debug(f"Deployment Complete: {status.json()['complete']}")
                     if status.json()["complete"]:
                         return status.json()
 
@@ -65,7 +58,7 @@ class KuduClient(AppService):
         top folder itself. Make sure you include the trailing slash!
         """
         try:
-            response = requests.get(f"{self.url}zip/{source}", auth=self.auth)
+            response = requests.get(f"{self.url}zip/{source}")
             logging.debug(response.headers)
             zipbytes = response.content
             zipfile = open(destination, "wb")
@@ -85,7 +78,7 @@ class KuduClient(AppService):
         https://github.com/projectkudu/kudu/wiki/REST-API
         """
         try:
-            response = requests.get(self.url + endpoint, auth=self.auth)
+            response = requests.get(self.url + endpoint)
             if response.ok is False:
                 raise AssertionError(
                     f"Failed to get {endpoint} on {self.url}\n"
@@ -106,19 +99,19 @@ class KuduClient(AppService):
         """
         https://github.com/projectkudu/kudu/wiki/REST-API#command
         """
-        logging.debug(f"Running {cmd} on {self.pp['web_url']}/{cwd}...")
+        logging.debug(f"Running {cmd} on {self.app}/{cwd}...")
         payload = {"command": cmd, "dir": cwd}
 
         try:
-            response = requests.post(self.url + "command", auth=self.auth, json=payload)
+            response = requests.post(self.url + "command", json=payload)
             if response.ok is False:
                 raise AssertionError(
-                    f"Failed to run {cmd} on {self.pp['web_url']}/{cwd}\n"
+                    f"Failed to run {cmd} on {self.url}/{cwd}\n"
                     + f"Code:{response.status_code}\n"
                     + f"Response: {response.text}"
                 )
         except Exception as error:
-            logging.debug(f"Failed to run {cmd} on {self.pp['web_url']}/{cwd}: {error}")
+            logging.debug(f"Failed to run {cmd} on {self.app}/{cwd}: {error}")
             logging.debug(traceback.format_exc())
             raise error
 
