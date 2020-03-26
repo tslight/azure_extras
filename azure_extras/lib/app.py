@@ -45,17 +45,18 @@ class AppService(AzureExtras):
             response = requests.patch(
                 url, headers=self.headers, params=params, data=json.dumps(patch)
             )
+            if response.ok is False:
+                raise AssertionError(
+                    f"Failed to patch {url} with {patch}, Code:{response.status_code}"
+                )
             content = response.json()
             success = (
                 content["properties"]["healthCheckPath"]
                 == patch["properties"]["healthCheckPath"]
             )
             logging.debug(json.dumps(content, indent=2, sort_keys=True))
-            if response.ok is False or success is False:
-                raise AssertionError(
-                    f"Failed to patch {url} with {patch}\n"
-                    + f"Code:{response.status_code}"
-                )
+            if success is False:
+                raise AssertionError(f"Failed to patch {url} with {patch}.")
         except requests.exceptions.ConnectionError as error:
             logging.warning("Transient connection issue. Trying again...")
             logging.debug(error)
