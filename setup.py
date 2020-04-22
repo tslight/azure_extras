@@ -15,7 +15,7 @@ setuptools.setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://gitlab.com/tspub/py/azure_extras",
-    install_requires=["azure", "requests"],
+    install_requires=["azure-common", "msrest", "msrestazure", "requests"],
     packages=setuptools.find_packages(),
     classifiers=(
         "Programming Language :: Python :: 3",
