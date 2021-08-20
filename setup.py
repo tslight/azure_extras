@@ -14,7 +14,7 @@ setuptools.setup(
     description="The stuff Microsoft left out..",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://gitlab.com/tspub/py/azure_extras",
+    url="https://gitlab.com/tslight/azure_extras",
     install_requires=["azure-common", "msrest", "msrestazure", "requests"],
     packages=setuptools.find_packages(),
     classifiers=(
