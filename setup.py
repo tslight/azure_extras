@@ -2,13 +2,25 @@
 # ISC License (ISCL) - see LICENSE file for details.
 
 import setuptools
+import subprocess
+
+
+def get_latest_tag():
+    try:
+        cmd_output = subprocess.run(
+            ["git", "describe", "--tags", "--abbrev=0"], stdout=subprocess.PIPE
+        )
+        return cmd_output.stdout.strip().decode("utf-8")
+    except EnvironmentError:
+        print("Couldn't run git to get a version number for setup.py")
+
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
     name="azure_extras",
-    version="0.1.9",
+    version=get_latest_tag(),
     author="Toby Slight",
     author_email="tslight@pm.me",
     description="The stuff Microsoft left out..",
