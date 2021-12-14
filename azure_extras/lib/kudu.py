@@ -17,6 +17,15 @@ class KuduClient(AppService):
         self.url = self.get_publishing_credentials(app)["scmUri"] + "/api/"
         logging.debug(self.url)
 
+    def get_logs(self):
+        # response = requests.get(self.url + "logs/recent")
+        response = requests.get(f"{self.url}vfs/LogFiles/application")
+        logfiles = response.json()
+        sorted_logfiles = sorted(logfiles, key=lambda d: d["mtime"])
+        latest_logfile = sorted_logfiles[len(sorted_logfiles) - 1]["name"]
+        response = requests.get(f"{self.url}vfs/LogFiles/application/{latest_logfile}")
+        print(response.text)
+
     def deploy_zip(self, path):
         """
         https://github.com/projectkudu/kudu/wiki/REST-API#zip-deployment

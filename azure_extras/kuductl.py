@@ -26,6 +26,7 @@ def get_args():
         help="command to run (use quotes for multi-word commands)",
     )
     group.add_argument("-e", "--endpoint", metavar=("SLUG"), help="api endpoint slug")
+    group.add_argument("-l", "--logs", action="store_true", help="get logs")
     group.add_argument(
         "-z",
         "--deploy_zip",
@@ -118,6 +119,8 @@ def main():
 
     if args.cmd:
         run_cmd(kudu, args.cmd, args.cwd)
+    elif args.logs:
+        kudu.get_logs()
     elif args.endpoint:
         get_endpoint(kudu, args.endpoint)
     elif args.deploy_zip:
