@@ -13,6 +13,8 @@ your subscription and tenant details along the way.
 
 This location can be customised with the `--config` flag at runtime.
 
+**TODO:** Use Azure CLI credentials
+
 ## KUDU API CLI FRONTEND
 
 https://github.com/projectkudu/kudu
