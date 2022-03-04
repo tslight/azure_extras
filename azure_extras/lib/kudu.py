@@ -17,14 +17,15 @@ class KuduClient(AppService):
         self.url = self.get_publishing_credentials(app)["scmUri"] + "/api/"
         logging.debug(self.url)
 
-    def get_logs(self):
+    def get_logs(self, line_count):
         # response = requests.get(self.url + "logs/recent")
         response = requests.get(f"{self.url}vfs/LogFiles/application")
         logfiles = response.json()
         sorted_logfiles = sorted(logfiles, key=lambda d: d["mtime"])
         latest_logfile = sorted_logfiles[len(sorted_logfiles) - 1]["name"]
         response = requests.get(f"{self.url}vfs/LogFiles/application/{latest_logfile}")
-        print(response.text)
+        response_lines = response.text.split("\r\n")
+        print("\n".join(response_lines[-line_count:]))
 
     def deploy_zip(self, path):
         """
