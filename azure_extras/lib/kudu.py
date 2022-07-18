@@ -22,6 +22,9 @@ class KuduClient(AppService):
         response = requests.get(f"{self.url}vfs/LogFiles/application")
         logfiles = response.json()
         sorted_logfiles = sorted(logfiles, key=lambda d: d["mtime"])
+        if len(sorted_logfiles) < 1:
+            print(f"No logfiles found on {self.app} :-(")
+            return
         latest_logfile = sorted_logfiles[len(sorted_logfiles) - 1]["name"]
         response = requests.get(f"{self.url}vfs/LogFiles/application/{latest_logfile}")
         response_lines = response.text.split("\r\n")
