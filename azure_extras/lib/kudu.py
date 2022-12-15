@@ -21,14 +21,25 @@ class KuduClient(AppService):
         # response = requests.get(self.url + "logs/recent")
         response = requests.get(f"{self.url}vfs/LogFiles/application")
         logfiles = response.json()
-        sorted_logfiles = sorted(logfiles, key=lambda d: d["mtime"])
+        sorted_logfiles = sorted(logfiles, key=lambda d: d["crtime"])
         if len(sorted_logfiles) < 1:
             print(f"No logfiles found on {self.app} :-(")
             return
-        latest_logfile = sorted_logfiles[len(sorted_logfiles) - 1]["name"]
-        response = requests.get(f"{self.url}vfs/LogFiles/application/{latest_logfile}")
-        response_lines = response.text.split("\r\n")
-        print("\n".join(response_lines[-line_count:]))
+
+        logfile_count = 1
+        log_lines = []
+
+        while len(log_lines) < line_count and logfile_count <= len(sorted_logfiles):
+            logfile = sorted_logfiles[len(sorted_logfiles) - logfile_count]["name"]
+            logdate = sorted_logfiles[len(sorted_logfiles) - logfile_count]["crtime"]
+            logging.info(f"Pre-pending contents of {logfile} from {logdate}...")
+            response = requests.get(f"{self.url}vfs/LogFiles/application/{logfile}")
+            lines = response.text.split("\r\n")
+            log_lines = lines + log_lines
+            logfile_count = logfile_count + 1
+            logging.debug(f"You now have {len(log_lines)}/{line_count} lines")
+
+        print("\n".join(log_lines[-line_count:]))
 
     def deploy_zip(self, path):
         """
