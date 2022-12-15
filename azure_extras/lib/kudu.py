@@ -17,23 +17,43 @@ class KuduClient(AppService):
         self.url = self.get_publishing_credentials(app)["scmUri"] + "/api/"
         logging.debug(self.url)
 
+    def convert_kudu_path(self, path):
+        return path.replace("C:\\home\\", "").replace("\\", "/")
+
+    def check_directory_for_logs(self, directory, allfiles=[]):
+        logging.debug(f"Checking {directory} for logfiles...")
+        response = requests.get(f"{self.url}vfs/{directory}")
+        logfiles = response.json()
+        for d in logfiles:
+            if d["mime"] == "inode/directory":
+                converted_path = self.convert_kudu_path(d["path"])
+                allfiles = allfiles + self.check_directory_for_logs(
+                    converted_path, allfiles
+                )
+        allfiles = allfiles + logfiles
+        allfiles = [
+            d
+            for d in allfiles
+            if d["name"].endswith(".log") or d["name"].endswith(".txt")
+        ]
+
+        return allfiles
+
     def get_logs(self, line_count):
         # response = requests.get(self.url + "logs/recent")
-        response = requests.get(f"{self.url}vfs/LogFiles/application")
-        logfiles = response.json()
-        sorted_logfiles = sorted(logfiles, key=lambda d: d["crtime"])
-        if len(sorted_logfiles) < 1:
-            print(f"No logfiles found on {self.app} :-(")
-            return
-
+        logfiles = self.check_directory_for_logs("LogFiles")
+        sorted_logfiles = sorted(logfiles, key=lambda d: d["mtime"])
         logfile_count = 1
         log_lines = []
 
         while len(log_lines) < line_count and logfile_count <= len(sorted_logfiles):
-            logfile = sorted_logfiles[len(sorted_logfiles) - logfile_count]["name"]
-            logdate = sorted_logfiles[len(sorted_logfiles) - logfile_count]["crtime"]
-            logging.info(f"Pre-pending contents of {logfile} from {logdate}...")
-            response = requests.get(f"{self.url}vfs/LogFiles/application/{logfile}")
+            logpath = sorted_logfiles[len(sorted_logfiles) - logfile_count]["path"]
+            logdate = sorted_logfiles[len(sorted_logfiles) - logfile_count]["mtime"]
+
+            converted_path = self.convert_kudu_path(logpath)
+            logging.info(f"Pre-pending contents of {converted_path} from {logdate}...")
+            response = requests.get(f"{self.url}vfs/{converted_path}")
+
             lines = response.text.split("\r\n")
             log_lines = lines + log_lines
             logfile_count = logfile_count + 1
