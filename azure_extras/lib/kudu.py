@@ -21,7 +21,7 @@ class KuduClient(AppService):
         return path.replace("C:\\home\\", "").replace("\\", "/")
 
     def check_directory_for_logs(self, directory, allfiles=[]):
-        logging.debug(f"Checking {directory} for logfiles...")
+        logging.info(f"Checking {directory} for logfiles...")
         response = requests.get(f"{self.url}vfs/{directory}")
         logfiles = response.json()
         for d in logfiles:
