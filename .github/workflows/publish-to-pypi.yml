@@ -11,14 +11,14 @@ jobs:
       uses: actions/setup-python@v1
       with:
         python-version: 3.9
+    - name: Install pypa/build
+      run: python -m pip install build --user
     - name: Build source distribution
       run: python setup.py sdist
     - name: Build Wheels
       run: python setup.py bdist_wheel
     - name: Build from source
       run: python setup.py build
-    - name: Install pypa/build
-      run: python -m pip install build --user
     - name: Build a binary wheel and a source tarball
       run: python -m build --sdist --wheel --outdir dist/
     - name: Publish distribution 📦 to PyPI
