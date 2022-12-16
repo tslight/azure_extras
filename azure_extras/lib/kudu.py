@@ -54,7 +54,7 @@ class KuduClient(AppService):
             logging.info(f"Pre-pending contents of {converted_path} from {logdate}...")
             response = requests.get(f"{self.url}vfs/{converted_path}")
 
-            lines = response.text.split("\r\n")
+            lines = response.text.split("\n")
             log_lines = lines + log_lines
             logfile_count = logfile_count + 1
             logging.debug(f"You now have {len(log_lines)}/{line_count} lines")
